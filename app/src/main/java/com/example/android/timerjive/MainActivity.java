@@ -3,6 +3,8 @@ package com.example.android.timerjive;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,48 +18,50 @@ public class MainActivity extends AppCompatActivity {
     Timer mTimer = new Timer();
     Boolean isRunning = false;
 
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            try {
+                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                r.play();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Log.e("TimerTask()", "Doing the thing!");
+
+            timerHandler.postDelayed(this,1000);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState != null){
+            Log.e("savedInstance", "isRunning value set to :" + isRunning.toString());
+
+            isRunning = savedInstanceState.getBoolean("isRunning");
+        } else {
+            Log.e("savedInstance", "savedInstance was null.");
+            isRunning = false;
+        }
     }
 
     public void startStop(View v){
         if(isRunning){
-            timerStop();
+            timerHandler.removeCallbacks(timerRunnable);
         } else {
-            timerStart();
+            timerHandler.postDelayed(timerRunnable, 0);
         }
+        isRunning = !isRunning;
     }
 
-    public void timerStart(){
-        // mTimer = new Timer();
-        mTimer.scheduleAtFixedRate(new TimerTask() {
-
-                                       @Override
-                                       public void run() {
-                                           try {
-                                               Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                                               Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-                                               r.play();
-                                           } catch (Exception e) {
-                                               e.printStackTrace();
-                                           }
-                                           Log.e("TimerTask()", "Doing the thing!");
-                                       }
-
-                                   },
-                //Set how long before to startButton calling the TimerTask (in milliseconds)
-                0,
-                //Set the amount of time between each execution (in milliseconds)
-                2000);
-        isRunning = true;
-        return;
-    }
-
-    public void timerStop(){
-        isRunning = false;
-        mTimer.cancel();
-        mTimer.purge();
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putBoolean("isRunning", isRunning);
     }
 }
