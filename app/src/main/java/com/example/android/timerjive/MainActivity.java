@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void startStop(View v){
+        Log.e("MainActivity", "startStop()");
         Intent intent = new Intent();
         intent.setAction("com.example.android.timerjive.STARTSTOP");
         sendBroadcast(intent);

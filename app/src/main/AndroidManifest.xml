@@ -18,17 +18,15 @@
 
         <service
             android:name=".TestService"
-            android:exported="true" />
-
-        <receiver
-            android:name=".TestService$TestReceiver"
-            android:enabled="true"
             android:exported="true">
+        </service>
+        <receiver android:name=".TestService$startStopReceiver">
             <intent-filter>
-                <action android:name="com.example.android.timerjive.STARTSTOP">
-                </action>
+                <action android:name="com.example.android.timerjive.STARTSTOP" />
             </intent-filter>
+
         </receiver>
+
     </application>
 
 </manifest>

@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -15,22 +16,25 @@ import android.util.Log;
  */
 
 public class TestService extends IntentService {
+//    IntentFilter filter = new IntentFilter();
+//    startStopReceiver startStopReceiver = new startStopReceiver();
 
-    private Boolean isRunning = false;
-    private Handler timerHandler = new Handler();
-    private Runnable timerRunnable = new Runnable() {
+    private static Boolean isRunning = false;
+    private static Context mContext;
+
+    private static Handler timerHandler = new Handler();
+    private static Runnable timerRunnable = new Runnable() {
 
         @Override
         public void run() {
             try {
                 Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                Ringtone r = RingtoneManager.getRingtone(mContext, notification);
                 r.play();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             Log.e("TimerTask()", "Doing the thing!");
-
             timerHandler.postDelayed(this,1000);
         }
     };
@@ -40,13 +44,23 @@ public class TestService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        Log.e("TestService", "onHandleIntent");
-
+    public void onCreate() {
+        super.onCreate();
+        Log.e("Test Service", "onCreate()");
 
     }
 
-    private void flip(){
+    @Override
+    public void onDestroy() {
+        Log.e("Test Service", "onDestroy()");
+        super.onDestroy();    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        Log.e("TestService", "onHandleIntent");
+    }
+
+    private static void flip(){
         Log.e("TestService", "flip()");
         if(isRunning){
             timerHandler.removeCallbacks(timerRunnable);
@@ -56,20 +70,15 @@ public class TestService extends IntentService {
         isRunning = !isRunning;
     }
 
-    public static class TestReceiver extends BroadcastReceiver {
-
-        public TestReceiver() {
+    public static class startStopReceiver extends BroadcastReceiver {
+        public startStopReceiver() {
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e("TestReceiver", "onReceive()");
-
-
-            //// I can't use this method, and I can't make the receiver non-static...
-
-
-            // flip();
+            Log.e("startStopReceiver", "onreceive()");
+            mContext = context;
+            flip();
         }
     }
 }
