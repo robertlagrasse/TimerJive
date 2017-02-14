@@ -1,5 +1,6 @@
 package com.example.android.timerjive;
 
+import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -15,53 +16,32 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    Timer mTimer = new Timer();
-    Boolean isRunning = false;
-
-    Handler timerHandler = new Handler();
-    Runnable timerRunnable = new Runnable() {
-
-        @Override
-        public void run() {
-            try {
-                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-                r.play();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Log.e("TimerTask()", "Doing the thing!");
-
-            timerHandler.postDelayed(this,1000);
-        }
-    };
+    public void launchTestService(){
+        Intent i = new Intent(this, TestService.class);
+        startService(i);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (savedInstanceState != null){
-            Log.e("savedInstance", "isRunning value set to :" + isRunning.toString());
-
-            isRunning = savedInstanceState.getBoolean("isRunning");
+            Log.e("savedInstance", "We're already running. Not Starting Service.");
         } else {
-            Log.e("savedInstance", "savedInstance was null.");
-            isRunning = false;
+            Log.e("savedInstance", "Not Running. Starting Service.");
+            launchTestService();
         }
     }
 
+
     public void startStop(View v){
-        if(isRunning){
-            timerHandler.removeCallbacks(timerRunnable);
-        } else {
-            timerHandler.postDelayed(timerRunnable, 0);
-        }
-        isRunning = !isRunning;
+        Intent intent = new Intent();
+        intent.setAction("com.example.android.timerjive.STARTSTOP");
+        sendBroadcast(intent);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
-        outState.putBoolean("isRunning", isRunning);
     }
 }
